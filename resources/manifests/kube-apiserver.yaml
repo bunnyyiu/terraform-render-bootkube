@@ -33,6 +33,7 @@ spec:
         - --bind-address=0.0.0.0
         - --client-ca-file=/etc/kubernetes/secrets/ca.crt
         - --cloud-provider=${cloud_provider}
+        - --cloud-config=/etc/kubernetes/cloudprovider/${cloud_provider}.conf
         - --etcd-cafile=/etc/kubernetes/secrets/etcd-client-ca.crt
         - --etcd-certfile=/etc/kubernetes/secrets/etcd-client.crt
         - --etcd-keyfile=/etc/kubernetes/secrets/etcd-client.key
@@ -53,6 +54,9 @@ spec:
             fieldRef:
               fieldPath: status.podIP
         volumeMounts:
+        - mountPath: /etc/kubernetes/cloudprovider/${cloud_provider}.conf
+          name: cloudconfig
+          readOnly: true
         - mountPath: /etc/ssl/certs
           name: ssl-certs-host
           readOnly: true
@@ -70,6 +74,10 @@ spec:
         operator: Exists
         effect: NoSchedule
       volumes:
+      - hostPath:
+          path: /etc/kubernetes/cloudprovider/${cloud_provider}.conf
+          type: ""
+        name: cloudconfig
       - name: ssl-certs-host
         hostPath:
           path: /usr/share/ca-certificates

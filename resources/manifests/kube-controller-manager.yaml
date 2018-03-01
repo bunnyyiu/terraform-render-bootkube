@@ -43,6 +43,7 @@ spec:
         - --use-service-account-credentials
         - --allocate-node-cidrs=true
         - --cloud-provider=${cloud_provider}
+        - --cloud-config=/etc/kubernetes/cloudprovider/${cloud_provider}.conf
         - --cluster-cidr=${pod_cidr}
         - --service-cluster-ip-range=${service_cidr}
         - --configure-cloud-routes=false
@@ -56,6 +57,9 @@ spec:
           initialDelaySeconds: 15
           timeoutSeconds: 15
         volumeMounts:
+        - mountPath: /etc/kubernetes/cloudprovider/${cloud_provider}.conf
+          name: cloudconfig
+          readOnly: true
         - name: secrets
           mountPath: /etc/kubernetes/secrets
           readOnly: true
@@ -73,6 +77,10 @@ spec:
         operator: Exists
         effect: NoSchedule
       volumes:
+      - hostPath:
+          path: /etc/kubernetes/cloudprovider/${cloud_provider}.conf
+          type: ""
+        name: cloudconfig
       - name: secrets
         secret:
           secretName: kube-controller-manager
